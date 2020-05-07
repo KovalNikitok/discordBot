@@ -1,0 +1,20 @@
+{
+  "name": "dicord",
+  "version": "12.2.0",
+  "description": "KovalNikitaBot",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "Koval Nikita",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/node-pre-gyp": "^0.1.0",
+    "discord.js": "^12.2.0",
+    "ffmpeg": "0.0.4",
+    "ffmpeg-static": "^4.2.1",
+    "gamedig": "^2.0.20",
+    "opusscript": "0.0.7",
+    "ytdl-core": "^2.1.1"
+  }
+}
