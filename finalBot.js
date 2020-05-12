@@ -1,25 +1,27 @@
 'use strict';
-const Discord = require('discord.js');	//ïîäêëþ÷àåì áèáëèîòåêó äëÿ ñîçäàíèÿ áîòîâ äèñêîðä
-const Bot = new Discord.Client(); //ïîäêëþ÷àåì áîòà
-let config = require('./config.json'); //ïîäêëþ÷àåì êîíôèã áîòà
-let token = config.token;	//ïîäêëþ÷àåì òîêåí èç êîíôèãà áîòà
-let prefix = config.prefix;	//ïîäêëþ÷àåì ïðåôèêñ èç êîíôèãà áîòà
-const ytdl = require('ytdl-core');
-const Gamedig = require('gamedig');
-const streamOptions={seek:0,volume:1};
-var songs = {};
+const Discord = require('discord.js');	//Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÑƒ Ð´Ð»Ñ ÑÐ¾Ð·Ð´Ð°Ð½Ð¸Ñ Ð±Ð¾Ñ‚Ð¾Ð² Ð´Ð¸ÑÐºÐ¾Ñ€Ð´
+const Bot = new Discord.Client(); //Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ð±Ð¾Ñ‚Ð°
+const config = require('./config.json');//Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ ÐºÐ¾Ð½Ñ„Ð¸Ð³ Ð±Ð¾Ñ‚Ð° Ñ Ð¿Ñ€ÐµÑ„Ð¸ÐºÑÐ¾Ð¼ Ð¸ Ñ‚Ð¾ÐºÐµÐ½Ð¾Ð¼
+const prefix = config.prefix;
+const token = config.token;//Ñ‚Ð¾ÐºÐµÐ½ Ð¿Ñ€Ð¾Ð¿Ð¸ÑÐ°Ñ‚ÑŒ Ð² ÐºÐ¾Ð½Ñ„Ð¸Ð³
+const ytdl = require('ytdl-core');//Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ ytdl Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÑƒ, Ð´Ð»Ñ Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ñ youtube 
+const Gamedig = require('gamedig');//Ð¿Ð¾Ð´ÐºÐ»Ð±Ñ‡Ð°ÐµÐ¼ gamedig Ð±Ð¸Ð±Ð»Ð¸Ð¾Ñ‚ÐµÐºÑƒ, Ð´Ð»Ñ Ð¿Ð°Ñ€ÑÐ¸Ð½Ð³Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ð¸ Ñ Ð¸Ð³Ñ€Ð¾Ð²Ñ‹Ñ… ÑÐµÑ€Ð²ÐµÑ€Ð¾Ð²
+
+const streamOptions={seek:0,volume:1};//ÑƒÑÑ‚Ð°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ð´Ð»Ñ Ð·Ð²ÑƒÐºÐ° Ð¿Ñ€Ð¸ Ð¿Ñ€Ð¾Ð¸Ð³Ñ€Ñ‹Ð²Ð°Ð½Ð¸Ð¸ Ð°ÑƒÐ´Ð¸Ð¾
+var songs = {};//Ð·Ð´ÐµÑÑŒ Ñ…Ñ€Ð°Ð½Ð¸Ð¼ ÑÐ¿Ð¸ÑÐ¾Ðº Ð¿ÐµÑÐµÐ½, ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ðµ "Ð·Ð°ÐºÐ°Ð·Ñ‹Ð²Ð°ÑŽÑ‚"
+
 Bot.on('ready', () => {
-	console.log('Áîò çàïóùåí:');
+	console.log('Ð‘Ð¾Ñ‚ Ð·Ð°Ð¿ÑƒÑ‰ÐµÐ½:');
 	Bot.generateInvite(["ADMINISTRATOR"]).then(link => {
 		console.log(`${new Date()}`);
 	});
-}); //ñîîáçåíèå, âûêèäûâàåìîå íà êîíñîëü, ïðè çàïóñêå è âõîäå áîòà íà ñåðâåð äèñêîðäà
+}); //ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ, Ð²Ñ‹ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼Ð¾Ðµ Ð½Ð° ÐºÐ¾Ð½ÑÐ¾Ð»ÑŒ, Ð¿Ñ€Ð¸ Ð·Ð°Ð¿ÑƒÑÐºÐµ Ð¸ Ð²Ñ…Ð¾Ð´Ðµ Ð±Ð¾Ñ‚Ð° Ð½Ð° ÑÐµÑ€Ð²ÐµÑ€ Ð´Ð¸ÑÐºÐ¾Ñ€Ð´Ð°
 Bot.on('reconnecting', () => {
 	    console.log('Reconnect!');
-	});//ñîîáùåíèå, âûêèäûâàåìîå íà êîíñîëü ïðè ïðè ïåðåïîäêëþ÷åíèè áîòà
+	});//ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ, Ð²Ñ‹ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼Ð¾Ðµ Ð½Ð° ÐºÐ¾Ð½ÑÐ¾Ð»ÑŒ Ð¿Ñ€Ð¸ Ð¿ÐµÑ€ÐµÐ¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ð¸ Ð±Ð¾Ñ‚Ð°
 Bot.on('disconnect', () => {
 	console.log('Disconnect!');
-});//ñîîáùåíèå, âûêèäûâàåìîå íà êîíñîëü ïðè îòêëþ÷åíèè áîòà
+});//ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ, Ð²Ñ‹ÐºÐ¸Ð´Ñ‹Ð²Ð°ÐµÐ¼Ð¾Ðµ Ð½Ð° ÐºÐ¾Ð½ÑÐ¾Ð»ÑŒ Ð¿Ñ€Ð¸ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ð¸ Ð±Ð¾Ñ‚Ð°
 
 Bot.on('message',async message => {
 
@@ -31,11 +33,12 @@ Bot.on('message',async message => {
             async function play(connection, message){
                 var song = songs[message.guild.id];
                 var stream = ytdl(song.queue[0],{filter:"audioonly"});
+
                 song.dispatcher = connection.play(stream,streamOptions);
                 song.queue.shift();
                 song.dispatcher.on("end", function(){
                     if(songs.queue[0]){
-                        message.channel.send(`Òðýê ${names} äîáàâëåí!`);
+                        message.channel.send(`Ð¢Ñ€ÑÐº ${names} Ð´Ð¾Ð±Ð°Ð²Ð»ÐµÐ½!`);
                         play(connection, message);
                     } else{
                         connection.disconnect();
@@ -48,12 +51,12 @@ Bot.on('message',async message => {
             }
 
             if(!message.member.voice.channel){
-                message.channel.send('Íóæíî íàõîäèòüñÿ â ãîëîñîâîì êàíàëå!');
+                message.channel.send('ÐÑƒÐ¶Ð½Ð¾ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒÑÑ Ð² Ð³Ð¾Ð»Ð¾ÑÐ¾Ð²Ð¾Ð¼ ÐºÐ°Ð½Ð°Ð»Ðµ!');
                 return;
             }
 
             if(!args[1] || !args[1].startsWith("https://www.youtube.com/watch?v=")){
-                message.channel.send('Íóæíà youtube - ññûëêà!');
+                message.channel.send('ÐÑƒÐ¶Ð½Ð° youtube - ÑÑÑ‹Ð»ÐºÐ°!');
                 return;
             }
 
@@ -66,37 +69,20 @@ Bot.on('message',async message => {
             song.queue.push(args[1]);
             
             if (!message.guild.voiceConnection){
+                try{
                 message.member.voice.channel.join().
                     then(function(connection){
-                        message.channel.send(`Ïîíåñëàñü!`);
+                        message.channel.send(`ÐŸÐ¾Ð½ÐµÑÐ»Ð°ÑÑŒ!`);
                         play(connection, message);                    
                     });
+                }catch(err){
+                    console.log("Error of trying to play: "+err);
+                }
             }
             break;
-        // case 'play+':
-        //     var song = songs[message.guild.id];
-        //     try {
-        //         song.queue.push(args[1]);
-        //         message.channel.send('Âàø òðýê äîáàâëåí â î÷åðåäü.');
-        //     } catch(err){
-        //         console.log("Play+ error: "+err);
-        //       }
-        //     break;
-
-        // case 'skip':
-        //         var song = songs[message.guild.id];
-        //         try{
-        //             if(song.dispatcher) song.dispatcher.end();
-        //                 console.log("Track skipped!");
-        //                 console.log(`Tracks: ${args.length}`);
-        //                 play(connection,message);
-        //         } catch(err){
-        //             console.log("Skip error: "+err);
-        //         }
-        //     break;
-
+			
         case 'stop':
-                var song = songs[message.guild.id];
+            var song = songs[message.guild.id];
             try{
                 if(song.dispatcher){
                     for (var i=song.queue.length-1; i>=0; i--){
@@ -104,66 +90,69 @@ Bot.on('message',async message => {
                     }
                     song.dispatcher.end();
                     console.log("Music stopped!");
-                    message.channel.send("Ðàáîòà îñòàíîâëåíà!");
-                    if(message.guild.voice.channel) message.guild.voiceConnection.disconnect();
+                    message.channel.send("Ð Ð°Ð±Ð¾Ñ‚Ð° Ð¾ÑÑ‚Ð°Ð½Ð¾Ð²Ð»ÐµÐ½Ð°!");
+                    if(message.guild.voice.channel) message.guild.voice.connection.disconnect();
                 }
             } catch(err){
                 console.log("Skip error: "+err);
+                return;
               }           
           break;
-        case 'ïðèâåò':
-            message.reply("Çäàðîâ!");
+
+        case 'game':
+            if(!args[1]|| ! args[2]){
+                console.log();
+                message.channel.send
+                ('ÐÐ°Ð¿Ð¸ÑˆÐ¸Ñ‚Ðµ Ñ‡ÐµÑ€ÐµÐ· Ð¿Ñ€Ð¾Ð±ÐµÐ» Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð¸Ð³Ñ€Ñ‹ Ð¸ ÑÐµÑ€Ð²ÐµÑ€,ÐºÐ¾Ñ‚Ð¾Ñ€Ñ‹Ð¹ Ð²Ð°Ð¼ Ð½ÑƒÐ¶ÐµÐ½, Ð° Ñ‚Ð°ÐºÐ¶Ðµ, ÐµÑÐ»Ð¸ ÐµÑÑ‚ÑŒ Ð½ÐµÐ¾Ð±Ñ…Ð¾Ð´Ð¸Ð¼Ð¾ÑÑ‚ÑŒ, Ñ‚Ñ€ÐµÑ‚ÑŒÐ¸Ð¼ ÑƒÐºÐ°Ð¶Ð¸Ñ‚Ðµ Ð¿Ð¾Ñ€Ñ‚');
+                return;
+            }     
+            var gameName = args[1];
+		    var serverName = args[2];
+		    var serverPort = null;
+
+            if(args[3]){
+               serverPort = args[3];
+            }
+
+            var gameState = Gamedig.query({
+               type: gameName,
+               host: serverName,
+               port: serverPort
+            });
+
+            gameState.then((state) => {
+                var gameInfo = state;
+
+                var usefulInfo = {
+                    name: gameInfo.name,
+                    map: gameInfo.map,
+                    maxplayers: gameInfo.maxplayers,
+                    playersOnline: gameInfo.players.length,
+                    connect: gameInfo.connect,
+                    ping: gameInfo.ping
+                };
+                var stringGameInfo = JSON.stringify(usefulInfo);
+                var responseText = '';              
+                for(var key=0;key<6;key++){
+                    responseText+=stringGameInfo.split(',')[key].concat('\n');
+                }   
+                responseText=responseText.substring(1,responseText.length-2);
+                message.channel.send(`${responseText}`);
+                console.log(responseText);
+
+            }).catch((error) => {
+                console.log("Error: "+ error);
+                return;
+            });
+        break;
+        		  
+        case 'Ð¿Ñ€Ð¸Ð²ÐµÑ‚':
+            message.reply("Ð—Ð´Ð°Ñ€Ð¾Ð²!");
             break;
-        case 'ïîêà':
-            message.reply("Àãà, áûâàé!");
+			
+        case 'Ð¿Ð¾ÐºÐ°':
+            message.reply("ÐÐ³Ð°, Ð±Ñ‹Ð²Ð°Ð¹!");
             break;
      }
 });
-Bot.on('message', msg =>{
-    if (msg.author.bot) return;
-    let args = msg.content.substring(prefix.length).split(" ");
-      if(msg.content.startsWith(prefix+'game')){
-          if(!args[1]|| ! args[2]){
-              console.log();
-              msg.channel.send
-            ('Íàïèøèòå ÷åðåç ïðîáåë íàçâàíèå èãðû è ñåðâåð,êîòîðûé âàì íóæåí, à òàêæå, åñëè åñòü íåîáõîäèìîñòü, òðåòüèì óêàæèòå ïîðò');
-          }
-          
-          var gameName = args[1],
-              serverName = args[2],
-              serverPort = null;
-
-          if(args[3]){
-              serverPort = args[3];
-          }
-
-          var gameState = Gamedig.query({
-              type: gameName,
-              host: serverName,
-              port: serverPort
-          });
-          gameState.then((state) => {
-              var gameInfo = state;
-
-              var usefulInfo = {
-                  name: gameInfo.name,
-                  map: gameInfo.map,
-                  maxplayers: gameInfo.maxplayers,
-                  playersOnline: gameInfo.players.length,
-                  connect: gameInfo.connect,
-                  ping: gameInfo.ping
-              };
-              var stringGameInfo = JSON.stringify(usefulInfo);
-              var responseText = '';
-                for(var key=0;key<6;key++){
-                  responseText+=stringGameInfo.split(',')[key].concat('\n');
-                }
-                console.log(responseText);
-                msg.channel.send(`${responseText}`);
-          }).catch((error) => {
-              console.log("Server is offline"+ error);
-          });
-          return;
-      }
-  });
 Bot.login(token);   
