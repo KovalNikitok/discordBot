@@ -24,33 +24,36 @@ Bot.on('disconnect', () => {
 });//сообщение, выкидываемое на консоль при отключении бота
 
 Bot.on('message',async message => {
+    //бот ожидает сообщение для запуска функции
 
-   if (message.author.bot) return;
+   if (message.author.bot) return; 
+   // если бот читает своё же сообщение, или от другого бота, то функция не выполнится
    let args = message.content.substring(prefix.length).split(" ");
+   //разделяем сообщение на вид: "сообщение без префикса" + другие команды через пробел
    
-     switch (args[0]) {
+     switch (args[0]) {//по первому слову после префикса
         case 'play':
-            async function play(connection, message){
-                var song = songs[message.guild.id];
-                var stream = ytdl(song.queue[0],{filter:"audioonly"});
+            async function play(connection, message){//позволяет выполнять функцию play асинхронно(для добавления в список)
+                var song = songs[message.guild.id];//добавляем в список аудио новый элемент
+                var stream = ytdl(song.queue[0],{filter:"audioonly"});//получаем доступ на youtube по объекту
 
-                song.dispatcher = connection.play(stream,streamOptions);
-                song.queue.shift();
-                song.dispatcher.on("end", function(){
-                    if(songs.queue[0]){
-                        message.channel.send(`Трэк ${names} добавлен!`);
-                        play(connection, message);
+                song.dispatcher = connection.play(stream,streamOptions);//запускаем поток для проигрывания аудио
+                song.queue.shift(); //выкидываем нынешнюю песню из списка
+                song.dispatcher.on("end", function(){//при завершении аудио входим в эту функцию
+                    if(songs.queue[0]){ //если в списке аудио есть элемент
+                        message.channel.send(`Трэк ${names} добавлен!`); //сообщение в канал дискорда
+                        play(connection, message);//вызываем рекурсию
                     } else{
-                        connection.disconnect();
+                        voice.connection.disconnect();//если в списке ничего нет, то выбрасываем бота с канала
                     }
-                }).on("error", err =>{
-                     console.log('Error of play stream: '+ error);
-                     play(connection,message);
-                     return;
-                   });    
+                }).on("error", err =>{//при ошибке
+                    message.channel.send('Не вышло добавить трэк!');
+                    console.log('Error of play stream: '+ error);
+                    return;
+                });    
             }
 
-            if(!message.member.voice.channel){
+            if(!message.member.voice.channel){//если выдавший запрос в чате не в голосовом канале
                 message.channel.send('Нужно находиться в голосовом канале!');
                 return;
             }
@@ -58,23 +61,22 @@ Bot.on('message',async message => {
             if(!args[1] || !args[1].startsWith("https://www.youtube.com/watch?v=")){
                 message.channel.send('Нужна youtube - ссылка!');
                 return;
-            }
+            }//если сообщение не содержит ничего или не начинается с ссылки на youtube
 
             if(!songs[message.guild.id]) songs[message.guild.id] ={
                 queue: []
-            }
+            }//если ещё на задан список песен-создаём(преимущественно на первой итерации)
 
-            var song = songs[message.guild.id];
+            var song = songs[message.guild.id];//создаём переменную и передаём список ^
+            song.queue.push(args[1]); //забиваем аудио в список
             
-            song.queue.push(args[1]);
-            
-            if (!message.guild.voiceConnection){
+            if (!message.guild.voice.connection){//если бот не в голосовом чате
                 try{
                 message.member.voice.channel.join().
                     then(function(connection){
                         message.channel.send(`Понеслась!`);
                         play(connection, message);                    
-                    });
+                    });//бот заходит в голосовой чат и запускает функцию play
                 }catch(err){
                     console.log("Error of trying to play: "+err);
                 }
@@ -84,23 +86,26 @@ Bot.on('message',async message => {
         case 'stop':
             var song = songs[message.guild.id];
             try{
-                if(song.dispatcher){
+                if(song.dispatcher){//если проигрывается
                     for (var i=song.queue.length-1; i>=0; i--){
-                        song.queue.splice(i, 1);
+                        song.queue.splice(i, 1);//удаляем из списка песню, что находится в очереди
                     }
-                    song.dispatcher.end();
+                    song.dispatcher.end();//закрываем аудио поток
                     console.log("Music stopped!");
                     message.channel.send("Работа остановлена!");
-                    if(message.guild.voice.channel) message.guild.voice.connection.disconnect();
+                    if(message.guild.voice.channel) 
+                        message.guild.voice.connection.disconnect();
+                        //если бот ещё не покинул голосовой канал, то сделает это
                 }
             } catch(err){
+                message.channel.send("Не смог остановить \\_(o.o)_/");
                 console.log("Skip error: "+err);
                 return;
               }           
           break;
 
         case 'game':
-            if(!args[1]|| ! args[2]){
+            if(!args[1]|| ! args[2]){//если нет названия игры или сервера
                 console.log();
                 message.channel.send
                 ('Напишите через пробел название игры и сервер,который вам нужен, а также, если есть необходимость, третьим укажите порт');
@@ -110,7 +115,7 @@ Bot.on('message',async message => {
 		    var serverName = args[2];
 		    var serverPort = null;
 
-            if(args[3]){
+            if(args[3]){//если есть порт, то он будет добавлен к объекту
                serverPort = args[3];
             }
 
@@ -123,7 +128,7 @@ Bot.on('message',async message => {
             gameState.then((state) => {
                 var gameInfo = state;
 
-                var usefulInfo = {
+                var usefulInfo = {//создаём json
                     name: gameInfo.name,
                     map: gameInfo.map,
                     maxplayers: gameInfo.maxplayers,
@@ -131,23 +136,24 @@ Bot.on('message',async message => {
                     connect: gameInfo.connect,
                     ping: gameInfo.ping
                 };
-                var stringGameInfo = JSON.stringify(usefulInfo);
+                var stringGameInfo = JSON.stringify(usefulInfo);//обращаем json в строку
                 var responseText = '';              
                 for(var key=0;key<6;key++){
                     responseText+=stringGameInfo.split(',')[key].concat('\n');
-                }   
+                }//приводим строку к удобному нам виду
                 responseText=responseText.substring(1,responseText.length-2);
                 message.channel.send(`${responseText}`);
                 console.log(responseText);
 
             }).catch((error) => {
+                message.channel.send('Что-то пошло не так...');
                 console.log("Error: "+ error);
                 return;
             });
         break;
         		  
         case 'привет':
-            message.reply("Здаров!");
+            message.reply("Здаров!"); 
             break;
 			
         case 'пока':
