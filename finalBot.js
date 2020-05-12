@@ -1,25 +1,25 @@
 'use strict';
-const Discord = require('discord.js');	//РїРѕРґРєР»СЋС‡Р°РµРј Р±РёР±Р»РёРѕС‚РµРєСѓ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ Р±РѕС‚РѕРІ РґРёСЃРєРѕСЂРґ
-const Bot = new Discord.Client(); //РїРѕРґРєР»СЋС‡Р°РµРј Р±РѕС‚Р°
-let config = require('./config.json'); //РїРѕРґРєР»СЋС‡Р°РµРј РєРѕРЅС„РёРі Р±РѕС‚Р°
-let token = config.token;	//РїРѕРґРєР»СЋС‡Р°РµРј С‚РѕРєРµРЅ РёР· РєРѕРЅС„РёРіР° Р±РѕС‚Р°
-let prefix = config.prefix;	//РїРѕРґРєР»СЋС‡Р°РµРј РїСЂРµС„РёРєСЃ РёР· РєРѕРЅС„РёРіР° Р±РѕС‚Р°
+const Discord = require('discord.js');	//подключаем библиотеку для создания ботов дискорд
+const Bot = new Discord.Client(); //подключаем бота
+let config = require('./config.json'); //подключаем конфиг бота
+let token = config.token;	//подключаем токен из конфига бота
+let prefix = config.prefix;	//подключаем префикс из конфига бота
 const ytdl = require('ytdl-core');
 const Gamedig = require('gamedig');
 const streamOptions={seek:0,volume:1};
 var songs = {};
 Bot.on('ready', () => {
-	console.log('Р‘РѕС‚ Р·Р°РїСѓС‰РµРЅ:');
+	console.log('Бот запущен:');
 	Bot.generateInvite(["ADMINISTRATOR"]).then(link => {
 		console.log(`${new Date()}`);
 	});
-}); //СЃРѕРѕР±Р·РµРЅРёРµ, РІС‹РєРёРґС‹РІР°РµРјРѕРµ РЅР° РєРѕРЅСЃРѕР»СЊ, РїСЂРё Р·Р°РїСѓСЃРєРµ Рё РІС…РѕРґРµ Р±РѕС‚Р° РЅР° СЃРµСЂРІРµСЂ РґРёСЃРєРѕСЂРґР°
+}); //сообзение, выкидываемое на консоль, при запуске и входе бота на сервер дискорда
 Bot.on('reconnecting', () => {
 	    console.log('Reconnect!');
-	});//СЃРѕРѕР±С‰РµРЅРёРµ, РІС‹РєРёРґС‹РІР°РµРјРѕРµ РЅР° РєРѕРЅСЃРѕР»СЊ РїСЂРё РїСЂРё РїРµСЂРµРїРѕРґРєР»СЋС‡РµРЅРёРё Р±РѕС‚Р°
+	});//сообщение, выкидываемое на консоль при при переподключении бота
 Bot.on('disconnect', () => {
 	console.log('Disconnect!');
-});//СЃРѕРѕР±С‰РµРЅРёРµ, РІС‹РєРёРґС‹РІР°РµРјРѕРµ РЅР° РєРѕРЅСЃРѕР»СЊ РїСЂРё РѕС‚РєР»СЋС‡РµРЅРёРё Р±РѕС‚Р°
+});//сообщение, выкидываемое на консоль при отключении бота
 
 Bot.on('message',async message => {
 
@@ -35,7 +35,7 @@ Bot.on('message',async message => {
                 song.queue.shift();
                 song.dispatcher.on("end", function(){
                     if(songs.queue[0]){
-                        message.channel.send(`РўСЂСЌРє ${names} РґРѕР±Р°РІР»РµРЅ!`);
+                        message.channel.send(`Трэк ${names} добавлен!`);
                         play(connection, message);
                     } else{
                         connection.disconnect();
@@ -48,12 +48,12 @@ Bot.on('message',async message => {
             }
 
             if(!message.member.voice.channel){
-                message.channel.send('РќСѓР¶РЅРѕ РЅР°С…РѕРґРёС‚СЊСЃСЏ РІ РіРѕР»РѕСЃРѕРІРѕРј РєР°РЅР°Р»Рµ!');
+                message.channel.send('Нужно находиться в голосовом канале!');
                 return;
             }
 
             if(!args[1] || !args[1].startsWith("https://www.youtube.com/watch?v=")){
-                message.channel.send('РќСѓР¶РЅР° youtube - СЃСЃС‹Р»РєР°!');
+                message.channel.send('Нужна youtube - ссылка!');
                 return;
             }
 
@@ -68,7 +68,7 @@ Bot.on('message',async message => {
             if (!message.guild.voiceConnection){
                 message.member.voice.channel.join().
                     then(function(connection){
-                        message.channel.send(`РџРѕРЅРµСЃР»Р°СЃСЊ!`);
+                        message.channel.send(`Понеслась!`);
                         play(connection, message);                    
                     });
             }
@@ -77,7 +77,7 @@ Bot.on('message',async message => {
         //     var song = songs[message.guild.id];
         //     try {
         //         song.queue.push(args[1]);
-        //         message.channel.send('Р’Р°С€ С‚СЂСЌРє РґРѕР±Р°РІР»РµРЅ РІ РѕС‡РµСЂРµРґСЊ.');
+        //         message.channel.send('Ваш трэк добавлен в очередь.');
         //     } catch(err){
         //         console.log("Play+ error: "+err);
         //       }
@@ -104,18 +104,18 @@ Bot.on('message',async message => {
                     }
                     song.dispatcher.end();
                     console.log("Music stopped!");
-                    message.channel.send("Р Р°Р±РѕС‚Р° РѕСЃС‚Р°РЅРѕРІР»РµРЅР°!");
+                    message.channel.send("Работа остановлена!");
                     if(message.guild.voice.channel) message.guild.voiceConnection.disconnect();
                 }
             } catch(err){
                 console.log("Skip error: "+err);
               }           
           break;
-        case 'РїСЂРёРІРµС‚':
-            message.reply("Р—РґР°СЂРѕРІ!");
+        case 'привет':
+            message.reply("Здаров!");
             break;
-        case 'РїРѕРєР°':
-            message.reply("РђРіР°, Р±С‹РІР°Р№!");
+        case 'пока':
+            message.reply("Ага, бывай!");
             break;
      }
 });
@@ -126,7 +126,7 @@ Bot.on('message', msg =>{
           if(!args[1]|| ! args[2]){
               console.log();
               msg.channel.send
-            ('РќР°РїРёС€РёС‚Рµ С‡РµСЂРµР· РїСЂРѕР±РµР» РЅР°Р·РІР°РЅРёРµ РёРіСЂС‹ Рё СЃРµСЂРІРµСЂ,РєРѕС‚РѕСЂС‹Р№ РІР°Рј РЅСѓР¶РµРЅ, Р° С‚Р°РєР¶Рµ, РµСЃР»Рё РµСЃС‚СЊ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚СЊ, С‚СЂРµС‚СЊРёРј СѓРєР°Р¶РёС‚Рµ РїРѕСЂС‚');
+            ('Напишите через пробел название игры и сервер,который вам нужен, а также, если есть необходимость, третьим укажите порт');
           }
           
           var gameName = args[1],
